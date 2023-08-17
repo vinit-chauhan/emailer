@@ -7,7 +7,6 @@ from email.mime.text import MIMEText
 # Gmail account details
 sender_email = ''
 password = ''
-message: MIMEMultipart
 server: smtplib.SMTP
 
 
@@ -21,11 +20,7 @@ def read_creds():
     return creds
 
 def init():
-    global message, server
-    # Create a message
-    message = MIMEMultipart()
-    message["From"] = sender_email
-    message["Subject"] = "Applying for a part-time job"
+    global server
 
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)
@@ -37,7 +32,12 @@ def init():
 
 
 def send_scheduled_email_to(receiver_email, body_text_file, attachment_file):
-    global message
+    # Create a message
+    message: MIMEMultipart
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["Subject"] = "Applying for a part-time job"
+    message.del_param("To")
     print('Attempting to send mail to', receiver_email)
 
     message["To"] = receiver_email
@@ -74,7 +74,8 @@ def done():
 if __name__ == '__main__':
     init()
 
-    send_scheduled_email_to("ADD RECEIVERS HERE", "res/body/company-1.txt", "res/resumes/resume1.pdf")
+    send_scheduled_email_to("ADD RECEIVER 1 HERE", "res/body/company-1.txt", "res/resumes/resume1.pdf")
+    send_scheduled_email_to("ADD RECEIVER 2 HERE", "res/body/company-1.txt", "res/resumes/resume1.pdf")
 
     done()
 
