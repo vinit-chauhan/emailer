@@ -3,82 +3,55 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
-# Gmail account details
-sender_email = ''
-password = ''
-server: smtplib.SMTP
+import configparser
 
 
-def read_creds():
-    global sender_email, password
-    creds = []
-
-    with open('.env', 'r') as env:
-        for line in env:
-            creds.append(line.split('=')[1][:-1])
-    return creds
-
-def init():
-    global server
-
-    try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        creds = read_creds()
-        server.login(creds[0], creds[1])
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
+def read_config():
+    config = configparser.ConfigParser()
+    config.read('.env')
+    return config['DEFAULT']['SENDER_EMAIL'], config['DEFAULT']['SENDER_PASSWORD']
 
 
-def send_scheduled_email_to(receiver_email, body_text_file, attachment_file):
-    # Create a message
-    message: MIMEMultipart
+def read_file(file_path):
+    with open(file_path, "r") as file:
+        return file.read()
+
+
+subject = "Application for a Part-time/Full-time Opportunity"
+
+
+def send_scheduled_email_to(server, sender_email, receiver_email, body_text_file, attachment_file, reference=None):
     message = MIMEMultipart()
     message["From"] = sender_email
-    message["Subject"] = "Applying for a part-time job"
-    message.del_param("To")
-    print('Attempting to send mail to', receiver_email)
-
+    message["Subject"] = subject if reference is None else subject + \
+        " | Reference: " + reference
     message["To"] = receiver_email
-    body = ''
-    with open(body_text_file, "r") as file:
-        body = file.read()
+    body = read_file(body_text_file)
     message.attach(MIMEText(body, "plain"))
 
     with open(attachment_file, "rb") as file:
         part = MIMEBase("application", "octet-stream")
         part.set_payload(file.read())
         encoders.encode_base64(part)
-        part.add_header("Content-Disposition", "attachment; filename=resume.pdf")
-
+        part.add_header("Content-Disposition",
+                        "attachment; filename=resume.pdf")
         message.attach(part)
 
-    # Send the email
-    try:
-        global server
-        server.sendmail(sender_email, receiver_email, message.as_string())
-        print("Email sent successfully.")
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
+    server.sendmail(sender_email, receiver_email, message.as_string())
+    print("Email sent successfully.")
 
-
-def done():
-    global server
-    server.quit()
-
-
-# Schedule the email to be sent every day at a specific time (24-hour format)
-# schedule.every().day.at("08:00").do(send_scheduled_email)
 
 if __name__ == '__main__':
-    init()
+    sender_email, password = read_config()
 
-    send_scheduled_email_to("ADD RECEIVER 1 HERE", "res/body/company-1.txt", "res/resumes/resume1.pdf")
-    send_scheduled_email_to("ADD RECEIVER 2 HERE", "res/body/company-1.txt", "res/resumes/resume1.pdf")
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(sender_email, password)
 
-    done()
-
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
+            send_scheduled_email_to(server, sender_email, "ADD RECEIVER 1 HERE", "res/body/sunset.txt",
+                                    "res/resumes/sunset.pdf", 'Reference 1')
+            send_scheduled_email_to(server, sender_email, "ADD RECEIVER 2 HERE", "res/body/sunset.txt",
+                                    "res/resumes/sunset.pdf")
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
