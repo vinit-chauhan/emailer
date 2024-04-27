@@ -1,0 +1,10 @@
+version: "3"
+services:
+  emailer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - TEST=1
+    ports:
+      - "8080:80"
