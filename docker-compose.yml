@@ -1,10 +1,9 @@
-version: "3"
 services:
   emailer:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      - TEST=1 # 1: Test run | 0: prod run 
+      - TEST=1 # 1: Test run | 0: prod run
     ports:
       - "8080:80"

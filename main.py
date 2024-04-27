@@ -80,12 +80,20 @@ def send():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get('/shutdown')
-def shutdown():
-    server.quit()
-    exit(0)
+@app.get('/test')
+def test():
+    sent_to = []
+    try:
+        for item in test_list:
+            sent_to.extend(send_scheduled_email_to(server, sender_email, item['receiver_email'], f"res/body/{item['body_file']}",
+                                                   f"res/resumes/{item['attachment_file']}", item.get('reference', None)))
 
+        return {"Status": "Success", "sent_to": sent_to}
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get('/')
 @app.get('/show-list')
 def show_list():
     return send_list
