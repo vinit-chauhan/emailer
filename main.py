@@ -1,14 +1,17 @@
+import os
 import smtplib
+import configparser
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import configparser
 from fastapi import FastAPI, HTTPException
 
 from send_list import send_list, test_list
 
 app = FastAPI()
+
+is_test = False if os.environ.get('TEST') == '0' else True
 
 
 def read_config():
@@ -48,9 +51,6 @@ def send_scheduled_email_to(server: smtplib.SMTP, sender_email: str, receivers: 
 
     return receivers
 
-
-global is_test
-is_test = True
 
 sender_email, password = read_config()
 send_list = send_list if not is_test else test_list
