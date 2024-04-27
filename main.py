@@ -6,6 +6,7 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 
 from send_list import send_list, test_list
 
@@ -66,7 +67,7 @@ except Exception as e:
     raise (f"An error occurred: {str(e)}")
 
 
-@app.get('/send')
+@app.post('/send')
 def send():
     sent_to = []
     try:
@@ -92,6 +93,10 @@ def test():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get('/send', response_class=HTMLResponse)
+def show_btn():
+    return '<html><body><form action="/send" method="post"><button type="submit">Send</button></form></body></html>'
 
 @app.get('/')
 @app.get('/show-list')
