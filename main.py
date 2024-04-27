@@ -47,7 +47,7 @@ def send_scheduled_email_to(server: smtplib.SMTP, sender_email: str, receivers: 
                             "attachment; filename=resume.pdf")
             message.attach(part)
 
-        # server.sendmail(sender_email, receiver_email, message.as_string())
+        server.sendmail(sender_email, receiver_email, message.as_string())
 
     return receivers
 

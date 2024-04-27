@@ -5,6 +5,6 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - TEST=1
+      - TEST=1 # 1: Test run | 0: prod run 
     ports:
       - "8080:80"
