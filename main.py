@@ -4,8 +4,9 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import configparser
+from typing import List
 
-from send_list import send_list
+from send_list import send_list, test_list
 
 
 def read_config():
@@ -22,7 +23,7 @@ def read_file(file_path):
 subject = "Application for a Part-time Job"
 
 
-def send_scheduled_email_to(server: smtplib.SMTP, sender_email, receivers, body_text_file, attachment_file, reference=None):
+def send_scheduled_email_to(server: smtplib.SMTP, sender_email: str, receivers: List[str], body_text_file: str, attachment_file: str, reference=None):
 
     for receiver_email in receivers:
         message = MIMEMultipart()
@@ -46,7 +47,12 @@ def send_scheduled_email_to(server: smtplib.SMTP, sender_email, receivers, body_
 
 
 if __name__ == '__main__':
+    global is_test
+    is_test = True
+
     sender_email, password = read_config()
+
+    send_list = send_list if not is_test else test_list
 
     try:
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
