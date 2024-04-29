@@ -58,17 +58,25 @@ send_list = send_list if not is_test else test_list
 
 server: smtplib.SMTP = None
 
-try:
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
-    server.login(sender_email, password)
+@app.get('/reconnect')
+def connect():
+    try:
+        global server
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, password)
+        return {'Status': 'success'}
 
-except Exception as e:
-    raise (f"An error occurred: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post('/send')
 def send():
+
+    if server == None:
+        connect()
+
     sent_to = []
     try:
         for item in send_list:
@@ -102,3 +110,4 @@ def show_btn():
 @app.get('/show-list')
 def show_list():
     return send_list
+
